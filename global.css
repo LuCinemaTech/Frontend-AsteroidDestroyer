@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .title-text-shadow {
+    text-shadow: 0px 4px 12px rgba(108, 92, 231, 0.6);
+  }
+  .banner-text-shadow {
+    text-shadow: 0px 4px 16px rgba(108, 92, 231, 0.8);
+  }
+  .font-mono-game {
+    font-family: "Courier New", Courier, monospace;
+  }
+}

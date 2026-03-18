@@ -1,0 +1,67 @@
+diff --git a/node_modules/@shopify/react-native-skia/lib/module/Platform/Platform.web.js b/node_modules/@shopify/react-native-skia/lib/module/Platform/Platform.web.js
+index 1172f9d..893a06c 100644
+--- a/node_modules/@shopify/react-native-skia/lib/module/Platform/Platform.web.js
++++ b/node_modules/@shopify/react-native-skia/lib/module/Platform/Platform.web.js
+@@ -140,6 +140,10 @@ export const Platform = {
+       }
+       throw new Error("Asset source is a number - this is not supported on the web");
+     }
++    // Expo SDK 52+ Metro returns {uri, width, height} objects
++    if (source && typeof source === "object" && typeof source.uri === "string") {
++      return source.uri;
++    }
+     return source.default;
+   },
+   findNodeHandle: () => {
+diff --git a/node_modules/@shopify/react-native-skia/lib/module/skia/Skia.web.js b/node_modules/@shopify/react-native-skia/lib/module/skia/Skia.web.js
+index d1d23ea..8d5f0c5 100644
+--- a/node_modules/@shopify/react-native-skia/lib/module/skia/Skia.web.js
++++ b/node_modules/@shopify/react-native-skia/lib/module/skia/Skia.web.js
+@@ -1,3 +1,45 @@
+ import { JsiSkApi } from "./web";
+-export const Skia = JsiSkApi(global.CanvasKit);
++let _Skia = null;
++function getSkia() {
++  if (!_Skia && typeof global.CanvasKit !== "undefined") {
++    _Skia = JsiSkApi(global.CanvasKit);
++  }
++  return _Skia;
++}
++var RESOLVE = Symbol("skia_resolve");
++function deferred(resolve) {
++  return new Proxy(function () {}, {
++    get(_, prop) {
++      if (prop === RESOLVE) return resolve;
++      var sk = getSkia();
++      if (sk) { var t = resolve(sk); return t == null ? undefined : t[prop]; }
++      if (prop === "bind") {
++        return function (thisArg) {
++          var rest = [].slice.call(arguments, 1);
++          var thisResolve = thisArg && thisArg[RESOLVE];
++          return deferred(function (sk2) {
++            var fn = resolve(sk2);
++            var ctx = thisResolve ? thisResolve(sk2) : thisArg;
++            return fn.bind.apply(fn, [ctx].concat(rest));
++          });
++        };
++      }
++      return deferred(function (sk2) { var t = resolve(sk2); return t == null ? undefined : t[prop]; });
++    },
++    apply(_, thisArg, args) {
++      var sk = getSkia();
++      if (sk) { return resolve(sk).apply(thisArg, args); }
++      return undefined;
++    }
++  });
++}
++var proxy = new Proxy({}, {
++  get(_, prop) {
++    if (prop === RESOLVE) return function (sk) { return sk; };
++    var sk = getSkia();
++    if (sk) return sk[prop];
++    return deferred(function (sk2) { return sk2[prop]; });
++  }
++});
++export const Skia = proxy;
+ //# sourceMappingURL=Skia.web.js.map
+\ No newline at end of file
