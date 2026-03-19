@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Game Menu",
+    "slug": "game-menu-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "gamemenu",
+    "userInterfaceStyle": "dark",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gamemenu.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1a1a2e"
+      },
+      "package": "com.gamemenu.app",
+      "largeHeap": true
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c9aa8962-4c51-4405-bd35-303b4d5bff0c"
+      }
+    },
+    "owner": "heliomatics",
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
